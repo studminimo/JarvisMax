@@ -1,4 +1,4 @@
-import { isServiceRoleKey, readSupabasePublicConfig, SUPABASE_PUBLIC_ENV } from "./config";
+import { isServiceRoleKey, readSupabasePublicConfig, readVapidPublicKey, SUPABASE_PUBLIC_ENV, VAPID_PUBLIC_ENV } from "./config";
 
 function jwt(payload: Record<string, unknown>): string {
   const encoded = btoa(JSON.stringify(payload)).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, "");
@@ -51,5 +51,15 @@ describe("configuration Supabase publique", () => {
     });
     expect(rejected).toEqual({ ok: false, error: "service_role_in_public_config" });
     expect(JSON.stringify(rejected)).not.toContain(serviceKey);
+  });
+
+  it("accepte seulement une clé publique VAPID", () => {
+    const bytes = new Uint8Array(65);
+    bytes[0] = 4;
+    bytes[1] = 9;
+    const key = btoa(String.fromCharCode(...bytes)).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, "");
+    expect(readVapidPublicKey({ [VAPID_PUBLIC_ENV]: key })).toBe(key);
+    expect(readVapidPublicKey({ [VAPID_PUBLIC_ENV]: "sk-secret" })).toBeNull();
+    expect(readVapidPublicKey({})).toBeNull();
   });
 });

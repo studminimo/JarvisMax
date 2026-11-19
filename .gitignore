@@ -36,6 +36,9 @@ yarn-error.*
 !.env.example
 .env*.local
 
+# Supabase CLI
+supabase/.temp/
+
 # tests
 coverage/
 

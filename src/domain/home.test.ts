@@ -14,6 +14,7 @@ describe("accueil", () => {
   it("reprend les éléments réellement fournis", () => {
     const copy = describeHome({
       nextTaskTitle: "  Appeler le médecin  ",
+      hasRecordedTask: true,
       dayCount: 2,
       priorities: ["Famille", " "],
       habits: ["Marche"],
@@ -37,6 +38,18 @@ describe("accueil", () => {
     });
     expect(copy.day.text).toBe("1 élément au planning.");
     expect(copy.progress.text).toBe("1 sur 1 terminée.");
+  });
+
+  it("signale que les tâches présentes sont terminées", () => {
+    expect(
+      describeHome({
+        ...EMPTY_HOME,
+        hasRecordedTask: true,
+        dayCount: 1,
+        completedCount: 1,
+        totalCount: 1,
+      }).nextTask,
+    ).toEqual({ filled: true, text: "Toutes les tâches sont terminées." });
   });
 
   it("refuse une progression incohérente", () => {

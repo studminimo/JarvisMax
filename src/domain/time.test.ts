@@ -1,5 +1,6 @@
 import {
   addDays,
+  addMonths,
   formatClock,
   formatLongDate,
   formatMonthTitle,
@@ -9,6 +10,7 @@ import {
   startOfWeek,
   weekdayIndexMonday,
   zonedDateKey,
+  zonedInstant,
   zonedParts,
 } from "./time";
 
@@ -22,6 +24,14 @@ describe("temps", () => {
     expect(addDays("2026-11-30", 1)).toBe("2026-12-01");
     expect(addDays("2026-03-01", -1)).toBe("2026-02-28");
     expect(addDays("2024-03-01", -1)).toBe("2024-02-29");
+  });
+
+  it("décale d’un mois en bornant le jour", () => {
+    expect(addMonths("2026-01-31", 1)).toBe("2026-02-28");
+    expect(addMonths("2024-01-31", 1)).toBe("2024-02-29");
+    expect(addMonths("2026-03-31", -1)).toBe("2026-02-28");
+    expect(addMonths("2026-12-15", 1)).toBe("2027-01-15");
+    expect(() => addMonths("2026-11-18", 1.5)).toThrow("Décalage invalide");
   });
 
   it("refuse une date impossible", () => {
@@ -63,5 +73,11 @@ describe("temps", () => {
     const acrossMonths = formatWeekTitle("2026-11-01").toLowerCase();
     expect(acrossMonths).toContain("oct");
     expect(acrossMonths).toContain("nov");
+  });
+
+  it("place une heure civile de Paris sur l’instant UTC", () => {
+    expect(zonedInstant("2026-11-19", "07:00").toISOString()).toBe("2026-11-19T06:00:00.000Z");
+    expect(zonedInstant("2026-07-19", "07:00").toISOString()).toBe("2026-07-19T05:00:00.000Z");
+    expect(() => zonedInstant("2026-11-19", "25:00")).toThrow("Heure invalide");
   });
 });

@@ -5,6 +5,8 @@ export const SUPABASE_PUBLIC_ENV = {
   anonKey: "EXPO_PUBLIC_SUPABASE_ANON_KEY",
 } as const;
 
+export const VAPID_PUBLIC_ENV = "EXPO_PUBLIC_VAPID_PUBLIC_KEY";
+
 export type SupabasePublicConfig = {
   url: string;
   anonKey: string;
@@ -34,7 +36,7 @@ export function isServiceRoleKey(key: string): boolean {
   }
 }
 
-/** Lit uniquement l’URL et la clé anonyme. N’ouvre aucune connexion. */
+/** Lit uniquement l’URL et la clé anonyme. Le client n’est créé qu’ensuite, si cette lecture réussit. */
 export function readSupabasePublicConfig(
   env: Record<string, string | undefined>,
 ): Result<SupabasePublicConfig, SupabaseConfigError> {
@@ -58,4 +60,19 @@ export function readSupabasePublicConfig(
     return err("invalid_supabase_url");
   }
   return ok({ url, anonKey });
+}
+
+/** Clé publique VAPID. La clé privée reste un secret de la fonction reminders. */
+export function readVapidPublicKey(env: Record<string, string | undefined>): string | null {
+  const key = env[VAPID_PUBLIC_ENV]?.trim() ?? "";
+  if (!key || key.startsWith("sk-") || key.includes("PRIVATE") || isServiceRoleKey(key)) {
+    return null;
+  }
+  const padded = key.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((key.length + 3) % 4);
+  try {
+    const binary = globalThis.atob(padded);
+    return binary.length === 65 && binary.charCodeAt(0) === 4 ? key : null;
+  } catch {
+    return null;
+  }
 }

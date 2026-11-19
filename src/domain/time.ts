@@ -40,6 +40,22 @@ export function addDays(dateKey: string, amount: number): string {
   return formatDateKey(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, shifted.getUTCDate());
 }
 
+export function addMonths(dateKey: string, amount: number): string {
+  if (!Number.isInteger(amount)) {
+    throw new Error("Décalage invalide");
+  }
+  const { year, month, day } = parseDateKey(dateKey);
+  const firstOfTarget = new Date(Date.UTC(year, month - 1 + amount, 1));
+  const lastDay = new Date(
+    Date.UTC(firstOfTarget.getUTCFullYear(), firstOfTarget.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  return formatDateKey(
+    firstOfTarget.getUTCFullYear(),
+    firstOfTarget.getUTCMonth() + 1,
+    Math.min(day, lastDay),
+  );
+}
+
 export function weekdayIndexMonday(dateKey: string): number {
   const { year, month, day } = parseDateKey(dateKey);
   const sundayBased = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
@@ -89,6 +105,41 @@ export function greetingForHour(hour: number): Greeting {
     return "Bonjour";
   }
   return "Bon après-midi";
+}
+
+export function parseClock(value: string): string | null {
+  const match = /^(\d{2}):(\d{2})(?::\d{2})?$/.exec(value.trim());
+  if (!match) {
+    return null;
+  }
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > 23 || minute > 59) {
+    return null;
+  }
+  return `${match[1]}:${match[2]}`;
+}
+
+/** Instant UTC correspondant à une heure civile dans un fuseau. */
+export function zonedInstant(dateKey: string, clock: string, timeZone = PRODUCT_TIME_ZONE): Date {
+  const time = parseClock(clock);
+  if (!time) {
+    throw new Error("Heure invalide");
+  }
+  const { year, month, day } = parseDateKey(dateKey);
+  const [hour, minute] = time.split(":").map(Number);
+  let utc = Date.UTC(year, month - 1, day, hour, minute, 0);
+  for (let pass = 0; pass < 2; pass += 1) {
+    const seen = zonedParts(new Date(utc), timeZone);
+    const wanted = Date.UTC(year, month - 1, day, hour, minute);
+    const got = Date.UTC(seen.year, seen.month - 1, seen.day, seen.hour, seen.minute);
+    utc += wanted - got;
+  }
+  return new Date(utc);
+}
+
+export function instantStamp(instant: Date): string {
+  return instant.toISOString().replace(/\.\d{3}Z$/u, "Z");
 }
 
 export function formatClock(instant: Date, timeZone = PRODUCT_TIME_ZONE): string {

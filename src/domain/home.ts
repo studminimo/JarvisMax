@@ -1,5 +1,6 @@
 export type HomeSnapshot = {
   nextTaskTitle: string | null;
+  hasRecordedTask: boolean;
   dayCount: number;
   priorities: readonly string[];
   habits: readonly string[];
@@ -9,6 +10,7 @@ export type HomeSnapshot = {
 
 export const EMPTY_HOME: HomeSnapshot = {
   nextTaskTitle: null,
+  hasRecordedTask: false,
   dayCount: 0,
   priorities: [],
   habits: [],
@@ -56,11 +58,17 @@ export function describeHome(snapshot: HomeSnapshot): HomeCopy {
   const priorities = cleanList(snapshot.priorities);
   const habits = cleanList(snapshot.habits);
   const progressWord = snapshot.totalCount > 1 ? "terminées" : "terminée";
+  const nextText =
+    nextTitle.length > 0
+      ? nextTitle
+      : snapshot.hasRecordedTask
+        ? "Toutes les tâches sont terminées."
+        : "Aucune tâche enregistrée.";
 
   return {
     nextTask: {
-      filled: nextTitle.length > 0,
-      text: nextTitle.length > 0 ? nextTitle : "Aucune tâche enregistrée.",
+      filled: nextTitle.length > 0 || snapshot.hasRecordedTask,
+      text: nextText,
     },
     day: {
       filled: snapshot.dayCount > 0,

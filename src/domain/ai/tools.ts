@@ -1,4 +1,4 @@
-/** Noms d’outils exécutés plus tard par la fonction Edge. Aucun appel réseau n’est fait depuis l’application. */
+/** Noms d’outils. L’application ne les exécute pas : la fonction Edge `chat` les interprète. */
 export const AI_TOOL_NAMES = [
   "create_task",
   "update_task",

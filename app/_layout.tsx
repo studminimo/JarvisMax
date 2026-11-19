@@ -12,6 +12,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { RootErrorBoundary } from "@/components/RootErrorBoundary";
 import { logger } from "@/data/logger";
+import { AccountProvider } from "@/features/account/AccountProvider";
+import { BoardProvider } from "@/features/board/BoardProvider";
+import { CoachProvider } from "@/features/coach/CoachProvider";
 import { colors } from "@/theme";
 
 export function ErrorBoundary(props: Parameters<typeof RootErrorBoundary>[0]) {
@@ -62,22 +65,28 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={navigationTheme}>
-        <StatusBar style="light" />
-        <View style={styles.root}>
-          <Stack
-            screenOptions={{
-              headerStyle: { backgroundColor: colors.surface },
-              headerTintColor: colors.text,
-              headerTitleStyle: { fontFamily: "OutfitMedium" },
-              headerShadowVisible: false,
-              contentStyle: { backgroundColor: colors.background },
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
-        </View>
-      </ThemeProvider>
+      <AccountProvider>
+        <BoardProvider>
+          <CoachProvider>
+          <ThemeProvider value={navigationTheme}>
+            <StatusBar style="light" />
+            <View style={styles.root}>
+              <Stack
+                screenOptions={{
+                  headerStyle: { backgroundColor: colors.surface },
+                  headerTintColor: colors.text,
+                  headerTitleStyle: { fontFamily: "OutfitMedium" },
+                  headerShadowVisible: false,
+                  contentStyle: { backgroundColor: colors.background },
+                }}
+              >
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </Stack>
+            </View>
+          </ThemeProvider>
+          </CoachProvider>
+        </BoardProvider>
+      </AccountProvider>
     </SafeAreaProvider>
   );
 }

@@ -1,4 +1,4 @@
-import { buildMonthGrid, buildWeek, entriesOnDate } from "./calendar";
+import { buildMonthGrid, buildWeek, entriesOnDate, shiftView, type CalendarView } from "./calendar";
 
 describe("calendrier", () => {
   it("aligne novembre 2026 sur le lundi 26 octobre", () => {
@@ -20,6 +20,14 @@ describe("calendrier", () => {
       "2026-11-21",
       "2026-11-22",
     ]);
+  });
+
+  it("décale le jour, la semaine et le mois", () => {
+    expect(shiftView("2026-11-18", "day", -1)).toBe("2026-11-17");
+    expect(shiftView("2026-11-18", "week", 1)).toBe("2026-11-25");
+    expect(shiftView("2026-01-31", "month", 1)).toBe("2026-02-28");
+    expect(() => shiftView("2026-11-18", "day", 2 as -1)).toThrow("Décalage invalide");
+    expect(() => shiftView("2026-11-18", "year" as CalendarView, 1)).toThrow("Vue invalide");
   });
 
   it("filtre les entrées du jour sans modifier la liste source", () => {

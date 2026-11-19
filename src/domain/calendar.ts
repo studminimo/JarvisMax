@@ -1,4 +1,4 @@
-import { addDays, parseDateKey, startOfWeek } from "./time";
+import { addDays, addMonths, parseDateKey, startOfWeek } from "./time";
 
 export type CalendarView = "day" | "week" | "month";
 
@@ -38,6 +38,23 @@ export function buildMonthGrid(dateKey: string, todayKey: string): CalendarCell[
   const first = `${year}-${String(month).padStart(2, "0")}-01`;
   const start = startOfWeek(first);
   return Array.from({ length: 42 }, (_, index) => toCell(addDays(start, index), month, year, todayKey));
+}
+
+export function shiftView(dateKey: string, view: CalendarView, direction: -1 | 1): string {
+  if (direction !== -1 && direction !== 1) {
+    throw new Error("Décalage invalide");
+  }
+  parseDateKey(dateKey);
+  if (view === "month") {
+    return addMonths(dateKey, direction);
+  }
+  if (view === "week") {
+    return addDays(dateKey, direction * 7);
+  }
+  if (view === "day") {
+    return addDays(dateKey, direction);
+  }
+  throw new Error("Vue invalide");
 }
 
 export function entriesOnDate<T extends { dateKey: string }>(
